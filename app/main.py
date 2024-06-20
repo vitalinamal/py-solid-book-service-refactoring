@@ -1,26 +1,34 @@
+from typing import Type
+
 from app.book import Book
-from app.display import ConsoleDisplay, ReverseDisplay
-from app.print_book import ConsolePrint, ReversePrint
-from app.serialize import JsonSerialize, XmlSerialize
+from app.display import ConsoleDisplay, ReverseDisplay, DisplayStrategy
+from app.print_book import ConsolePrint, ReversePrint, PrintStrategy
+from app.serialize import JsonSerialize, XmlSerialize, SerializeStrategy
+
+DISPLAY_STRATEGIES: dict[str, Type[DisplayStrategy]] = {
+    "console": ConsoleDisplay,
+    "reverse": ReverseDisplay,
+}
+
+PRINT_STRATEGIES: dict[str, Type[PrintStrategy]] = {
+    "console": ConsolePrint,
+    "reverse": ReversePrint,
+}
+
+SERIALIZER_STRATEGIES: dict[str, Type[SerializeStrategy]] = {
+    "json": JsonSerialize,
+    "xml": XmlSerialize,
+}
 
 
 def main(book: Book, commands: list[tuple[str, str]]) -> None | str:
     for cmd, method_type in commands:
         if cmd == "display":
-            if method_type == "console":
-                ConsoleDisplay().display(book)
-            elif method_type == "reverse":
-                ReverseDisplay().display(book)
+            DISPLAY_STRATEGIES[method_type]().display(book)
         elif cmd == "print":
-            if method_type == "console":
-                ConsolePrint().print(book)
-            elif method_type == "reverse":
-                ReversePrint().print(book)
+            PRINT_STRATEGIES[method_type]().print(book)
         elif cmd == "serialize":
-            if method_type == "json":
-                return JsonSerialize().serialize(book)
-            elif method_type == "xml":
-                return XmlSerialize().serialize(book)
+            return SERIALIZER_STRATEGIES[method_type]().serialize(book)
 
 
 if __name__ == "__main__":
